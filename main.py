@@ -2,6 +2,31 @@ from src.crypto import RSA, OAEP
 from src.signature.signer import Signer
 from src.utils.base64_handler import Base64Handler
 
+def test_verify_signature(bits=1024, test_message=b"Mensagem para teste de verificacao"):
+    print("=" * 50)
+    print("Iniciando teste de Verificação de Assinatura...")
+    print("=" * 50)
+
+    # 1. Gera as chaves RSA
+    print("\n[1/3] Gerando chaves RSA...")
+    rsa = RSA()
+    rsa.generate_keys(bits)
+
+    # 2. Assina a mensagem
+    print("\n[2/3] Assinando mensagem...")
+    signer = Signer(rsa)
+    signed_document = signer.sign_message(test_message)
+
+    print("\nDocumento assinado (primeiros 100 caracteres):")
+    print(signed_document[:100], "...")
+
+    # 3. Verifica a assinatura
+    print("\n[3/3] Verificando assinatura...")
+    if signer.verify_signature(signed_document):
+        print("\n✅ Assinatura válida! A mensagem não foi alterada.")
+    else:
+        print("\n❌ Falha na verificação! A mensagem pode ter sido alterada.")
+
 def test_rsa_oaep(bits=1024, test_message=b"Teste de RSA com OAEP"):
     print("="*50)
     print("Iniciando teste de RSA com OAEP...")
@@ -108,5 +133,10 @@ def main():
     print("\n=== Teste 2: Assinatura Digital ===")
     test_signature(bits=1024, test_message=b"Mensagem para ser assinada")
 
+    # Teste de Verificação de Assinatura
+    print("\n=== Teste 3: Verificação da Assinatura ===")
+    test_verify_signature(bits=1024, test_message=b"Mensagem para teste de verificacao")
+
 if __name__ == "__main__":
     main()
+

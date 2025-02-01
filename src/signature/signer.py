@@ -43,3 +43,39 @@ class Signer:
         
         print("Assinatura concluída com sucesso!")
         return formatted_signature
+
+    def verify_signature(self, signed_document: str) -> bool:
+        """
+        Verifica se uma assinatura digital é válida.
+        
+        Args:
+            signed_document (str): Documento assinado em formato BASE64.
+        
+        Returns:
+            bool: True se a assinatura for válida, False caso contrário.
+        """
+        try:
+            # Faz o parsing do documento assinado
+            message, signature, public_key = self.base64_handler.parse_signature(signed_document)
+            
+            # Calcula o hash da mensagem original
+            hash_calculado = calculate_hash(message)
+            
+            # Converte a assinatura de bytes para inteiro
+            signature_int = int.from_bytes(signature, 'big')
+            
+            # Decifra a assinatura usando a chave pública
+            decrypted_hash_int = pow(signature_int, public_key[0], public_key[1])  # signature^e mod n
+            hash_decifrado = decrypted_hash_int.to_bytes((decrypted_hash_int.bit_length() + 7) // 8, 'big')
+            
+            # Compara os hashes
+            if hash_calculado == hash_decifrado:
+                print("\n✅ Assinatura válida! A mensagem não foi alterada.")
+                return True
+            else:
+                print("\n❌ Falha na verificação da assinatura! A mensagem pode ter sido alterada.")
+                return False
+        
+        except Exception as e:
+            print(f"Erro na verificação da assinatura: {e}")
+            return False
