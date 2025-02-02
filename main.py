@@ -2,31 +2,6 @@ from src.crypto import RSA, OAEP
 from src.signature.signer import Signer
 from src.utils.base64_handler import Base64Handler
 
-def test_verify_signature(bits=1024, test_message=b"Mensagem para teste de verificacao"):
-    print("=" * 50)
-    print("Iniciando teste de Verificação de Assinatura...")
-    print("=" * 50)
-
-    # 1. Gera as chaves RSA
-    print("\n[1/3] Gerando chaves RSA...")
-    rsa = RSA()
-    rsa.generate_keys(bits)
-
-    # 2. Assina a mensagem
-    print("\n[2/3] Assinando mensagem...")
-    signer = Signer(rsa)
-    signed_document = signer.sign_message(test_message)
-
-    print("\nDocumento assinado (primeiros 100 caracteres):")
-    print(signed_document[:100], "...")
-
-    # 3. Verifica a assinatura
-    print("\n[3/3] Verificando assinatura...")
-    if signer.verify_signature(signed_document):
-        print("\n✅ Assinatura válida! A mensagem não foi alterada.")
-    else:
-        print("\n❌ Falha na verificação! A mensagem pode ter sido alterada.")
-
 def test_rsa_oaep(bits=1024, test_message=b"Teste de RSA com OAEP"):
     print("="*50)
     print("Iniciando teste de RSA com OAEP...")
@@ -123,6 +98,36 @@ def test_signature(bits=1024, test_message=b"Mensagem para ser assinada"):
         print("\nTeste de assinatura concluído com sucesso!")
     except Exception as e:
         print(f"Erro ao processar documento assinado: {e}")
+
+def test_verify_signature(bits=1024, test_message=b"Mensagem para teste de verificacao"):
+    print("="*50)
+    print("Teste de Verificação de Assinatura Digital")
+    print("="*50)
+    
+    try:
+        # 1. Configuração inicial
+        print("\n[1/4] Inicializando RSA e gerando chaves...")
+        rsa = RSA()
+        rsa.generate_keys(bits)
+        signer = Signer(rsa)
+        
+        # 2. Assinatura
+        print("\n[2/4] Assinando mensagem de teste...")
+        signed_doc = signer.sign_message(test_message)
+        
+        # 3. Verificação
+        print("\n[3/4] Verificando assinatura...")
+        is_valid = signer.verify_signature(signed_doc)
+        
+        # 4. Resultado
+        print("\n[4/4] Resultado da verificação:")
+        if is_valid:
+            print("Assinatura válida! A mensagem não foi alterada.")
+        else:
+            print("Assinatura inválida! A mensagem pode ter sido alterada.")
+            
+    except Exception as e:
+        print(f"\nErro durante o teste: {e}")
 
 def main():
     # Teste do RSA com OAEP

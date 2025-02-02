@@ -55,27 +55,19 @@ class Signer:
             bool: True se a assinatura for válida, False caso contrário.
         """
         try:
-            # Faz o parsing do documento assinado
+            # 1. Parsing do documento assinado e decifração da mensagem (BASE64)
             message, signature, public_key = self.base64_handler.parse_signature(signed_document)
             
-            # Calcula o hash da mensagem original
-            hash_calculado = calculate_hash(message)
+            # 2. Calcula o hash da mensagem original
+            calculated_hash = calculate_hash(message)
+            calculated_hash_int = int.from_bytes(calculated_hash, 'big')
             
-            # Converte a assinatura de bytes para inteiro
+            # 3. Decifração da assinatura (usando chave pública)
             signature_int = int.from_bytes(signature, 'big')
-            
-            # Decifra a assinatura usando a chave pública
             decrypted_hash_int = pow(signature_int, public_key[0], public_key[1])  # signature^e mod n
-            hash_decifrado = decrypted_hash_int.to_bytes((decrypted_hash_int.bit_length() + 7) // 8, 'big')
             
-            # Compara os hashes
-            if hash_calculado == hash_decifrado:
-                print("\n✅ Assinatura válida! A mensagem não foi alterada.")
-                return True
-            else:
-                print("\n❌ Falha na verificação da assinatura! A mensagem pode ter sido alterada.")
-                return False
-        
+            # 4. Verificação: compara o hash calculado com o hash decifrado
+            return calculated_hash_int == decrypted_hash_int
+            
         except Exception as e:
-            print(f"Erro na verificação da assinatura: {e}")
-            return False
+            raise ValueError(f"Erro na verificação da assinatura: {e}")
