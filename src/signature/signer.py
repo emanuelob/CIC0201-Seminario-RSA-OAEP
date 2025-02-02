@@ -29,7 +29,7 @@ class Signer:
         hash_int = int.from_bytes(message_hash, 'big')
         
         # 3. Cifra o hash (assina) usando a chave privada
-        signature_int = self.rsa.decrypt(hash_int)  # Usa decrypt pois assinar é cifrar com d
+        signature_int = self.rsa.decrypt(hash_int)  #usa decrypt pois assinar é cifrar com d
         
         # 4. Converte a assinatura para bytes
         signature = signature_int.to_bytes((signature_int.bit_length() + 7) // 8, 'big')
