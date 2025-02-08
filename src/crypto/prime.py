@@ -1,37 +1,43 @@
-from gmpy2 import random_state, next_prime, mpz_urandomb
 import random
-import sys
 
-def generate_prime(bits):
-    """
-    Gera um número primo com o número especificado de bits.
-    
-    Args:
-        bits (int): Número de bits do primo desejado
-    
-    Returns:
-        int: Número primo
-    """
-    print(f"Iniciando geração de primo de {bits} bits...")
-    
-    # Usa o random do sistema para seed
-    seed = random.randint(0, sys.maxsize)
-    rand_state = random_state(seed)
+def miller_rabin(n, k=40):  # Teste de primalidade probabilística
+    if n <= 1:
+        return False
+    if n <= 3:
+        return True
+    if n % 2 == 0:
+        return False
 
+    # Escreve n-1 como 2^r * d
+    r, d = 0, n - 1
+    while d % 2 == 0:
+        r += 1
+        d //= 2
+
+    for _ in range(k):
+        a = random.randint(2, n - 2)
+        x = pow(a, d, n)
+        if x == 1 or x == n - 1:
+            continue
+
+        for _ in range(r - 1):
+            x = pow(x, 2, n)
+            if x == n - 1:
+                break
+        else:
+            return False
+
+    return True
+
+def generate_large_prime(bits):
     while True:
-        try:
-            # Gera número aleatório e garante que seja ímpar e tenha o tamanho correto
-            num = mpz_urandomb(rand_state, bits)
-            num |= (1 << (bits - 1)) | 1  # Garante bits-1 e faz o número ser ímpar
-            
-            prime = next_prime(num)
-            
-            # Verifica se o primo tem o tamanho correto
-            if prime.bit_length() == bits:
-                return int(prime)
-                        
-        except Exception as e:
-            print(f"Erro durante geração: {e}")
-            print("Tentando novamente com nova seed...")
-            seed = random.randint(0, sys.maxsize)
-            rand_state = random_state(seed)
+        prime = random.getrandbits(bits)
+        prime |= (1 << bits - 1) | 1  # Garante que o número tem o tamanho correto e é ímpar
+        if miller_rabin(prime):
+            return prime
+
+def generate_prime(bits=1024):
+    print("Gerando primo")
+    p = generate_large_prime(bits)
+
+    return p
