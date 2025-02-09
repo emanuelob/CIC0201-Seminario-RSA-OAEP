@@ -35,3 +35,11 @@ def generate_large_prime(bits):
         prime |= (1 << bits - 1) | 1  # Garante que o número tem o tamanho correto e é ímpar
         if miller_rabin(prime):
             return prime
+        
+def gcd_euclides(a: int, b: int) -> int:
+    """
+    Calcula o MDC de dois números usando o algoritmo de Euclides.
+    """
+    while b:
+        a, b = b, a % b
+    return a

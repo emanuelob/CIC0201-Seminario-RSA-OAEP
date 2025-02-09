@@ -1,5 +1,5 @@
 import os
-from .prime import generate_large_prime
+from .prime import generate_large_prime, gcd_euclides
 from .oaep import OAEP
 import time
 
@@ -47,6 +47,14 @@ class RSA:
         
         # Escolhe o expoente público e (2^16 + 1)
         e = 65537  
+
+        # Verifica se e é válido
+        if e >= phi:
+            raise ValueError("Expoente público e deve ser menor que φ(n)")
+        
+        # Verifica se são coprimos usando algoritmo de Euclides
+        if gcd_euclides(e, phi) != 1:
+            raise ValueError("Expoente público e deve ser coprimo com φ(n)")
         
         # Calcula o expoente privado d --> d * e ≡ 1 (mod phi)
         d = pow(e, -1, phi)  # Inverso multiplicativo modular
