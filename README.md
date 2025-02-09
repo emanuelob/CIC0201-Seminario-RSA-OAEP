@@ -23,10 +23,8 @@ rsa_signature/
 │   │   └── sha3.py             # Interface de hash SHA-3
 │   ├── signature/
 │   │   ├── signer.py           # Lógica de assinatura
-│   ├── utils/
-│   │   ├── base64_handler.py   # Utilitários de codificação BASE64
 └── main.py                     # Ponto de entrada da aplicação
-└── requirements.txt            # Dependências do projeto
+└── mensagem.txt                # Mensagem de teste para a execução do programa
 ```
 
 ## Instalação
@@ -37,12 +35,7 @@ git clone <https://github.com/emanuelob/CIC0201-Seminario-RSA-OAEP.git>
 cd CIC0201-Seminario-RSA-OAEP
 ```
 
-2. Instale a dependência necessária:
-```bash
-pip install gmpy2
-```
-
-3. Executando o projeto:
+2. Execute o projeto:
 ```bash
 python main.py
 ```
@@ -53,23 +46,21 @@ O sistema opera em três fases principais:
 
 ### 1. Geração de Chaves e Criptografia
 - Gera chaves RSA seguras usando números primos de no mínimo 1024 bits
+- Aplica teste de primalidade de Miller-Rabin
 - Implementa padding OAEP para segurança aprimorada
-- Utiliza geração eficiente de primos com a biblioteca gmpy2
 
 ### 2. Geração de Assinatura
 - Calcula o hash SHA-3 da mensagem de entrada
 - Assina o hash usando a chave privada RSA
-- Formata a assinatura usando codificação BASE64 com metadados
+- Formata a assinatura usando codificação BASE64
 
 ### 3. Verificação de Assinatura
-- Analisa o documento assinado para extrair componentes
-- Decifra a assinatura usando a chave pública
+- Parsing do documento assinado em BASE64 e aplicação da função de hash criptográfica na mensagem em claro 
+- Após o parsing, decifra a assinatura usando a chave pública
 - Verifica a integridade da mensagem comparando hashes
 
 ## Testes
 
 Os testes para os componentes estão localizados na main.py:
-- Criptografia/descriptografia RSA com OAEP
-- Geração e verificação de assinaturas
-- Cálculo e verificação de hash
-- Codificação/decodificação BASE64
+- Você pode alterar a mensagem.txt após a assinatura para verificar a integridade
+- Você pode testar com mensagens/arquivos maiores que 190 bytes não suportados pelo OAEP

@@ -73,8 +73,8 @@ class RSA:
         """
         Cifra uma mensagem usando RSA.
         """
-        e, d = self.private_key
-        cipher = pow(message, e, d)
+        d, n = self.private_key
+        cipher = pow(message, d, n)
         # print("Mensagem cifrada com sucesso: ", cipher)
         return cipher
     
@@ -138,6 +138,7 @@ class RSA:
         padded_bytes = padded_int.to_bytes(n_bytes, 'big')
         return oaep.unpad(padded_bytes)
 
+    # Não usada no projeto, pois aqui pega a mensagem em claro sem o hash
     def encrypt_from_file(self, input_file="mensagem.txt", output_file="mensagem_cifrada.txt"):
         """
         Lê uma mensagem de um arquivo, aplica OAEP, cifra com RSA e salva em outro arquivo.
@@ -147,7 +148,7 @@ class RSA:
             return
 
         # Carrega a chave pública
-        if not self.load_public_key():
+        if not self.load_private_key():
             return
 
         try:
@@ -169,6 +170,7 @@ class RSA:
             print(f"Erro no processo de cifração: {e}")
             return
 
+    # Não usada no projeto, pois aqui pega a mensagem em claro sem o hash
     def decrypt_from_file(self, input_file="mensagem_cifrada.txt", output_file="mensagem_decifrada.txt"):
         """
         Lê mensagem cifrada, decifra com RSA, remove OAEP e salva resultado.
@@ -178,7 +180,7 @@ class RSA:
             return
 
         # Carrega a chave privada
-        if not self.load_private_key():
+        if not self.load_public_key:
             return
 
         try:
@@ -200,6 +202,7 @@ class RSA:
             print(f"Erro no processo de decifração: {e}")
             return
 
+    # Não usado no projeto. Os arquivos existem, mas usamos os atributos da classe
     def load_private_key(self, private_key_file="chave_privada.txt"):
         """
         Carrega a chave privada do arquivo e armazena na instância da classe.
@@ -218,6 +221,7 @@ class RSA:
                 print("Erro ao carregar a chave privada.")
                 return False
     
+    # Não usado no projeto. Os arquivos existem, mas usamos os atributos da classe
     def load_public_key(self, public_key_file="chave_publica.txt"):
         """
         Carrega a chave pública do arquivo e armazena na instância da classe.

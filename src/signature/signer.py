@@ -25,21 +25,14 @@ class Signer:
         # 1. Calcula o hash da mensagem
         message_hash = calculate_hash(message)
         
-        # # 2. Converte o hash para inteiro
-        # hash_int = int.from_bytes(message_hash, 'big')
+        # 2. Cifra/Criptografa o hash usando a chave privada
+        signature_int = self.rsa.encrypt_with_oaep(message_hash)  
         
-        # 3. Cifra o hash (assina) usando a chave privada
-        signature_int = self.rsa.decrypt_with_oaep(message_hash)  #usa decrypt pois assinar é cifrar com d
-        
-        # 4. Converte a assinatura para bytes
+        # 3. Converte a assinatura para bytes
         signature = signature_int.to_bytes((signature_int.bit_length() + 7) // 8, 'big')
         
-        # 5. Formata o resultado
-        formatted_signature = self.base64_handler.format_signature(
-            message,
-            signature,
-            self.rsa.public_key
-        )
+        # 4. Formata o resultado
+        formatted_signature = base64.b64encode(signature).decode()
         
         print("Assinatura concluída com sucesso!")
         return formatted_signature
@@ -55,19 +48,25 @@ class Signer:
             bool: True se a assinatura for válida, False caso contrário.
         """
         try:
+            with open("mensagem.txt", "r", encoding="utf-8") as file:
+                message = file.read().strip()
+        
             # 1. Parsing do documento assinado e decifração da mensagem (BASE64)
-            message, signature, public_key = self.base64_handler.parse_signature(signed_document)
-            
+            signature_int = int.from_bytes(base64.b64decode(signed_document))
+
             # 2. Calcula o hash da mensagem original
-            calculated_hash = calculate_hash(message)
-            calculated_hash_int = int.from_bytes(calculated_hash, 'big')
-            
+            message_bytes = message.encode()
+            calculated_hash = calculate_hash(message_bytes)
+
             # 3. Decifração da assinatura (usando chave pública)
-            signature_int = int.from_bytes(signature, 'big')
-            decrypted_hash_int = pow(signature_int, public_key[0], public_key[1])  # signature^e mod n
+            decrypted_hash = self.rsa.decrypt_with_oaep(signature_int)
             
-            # 4. Verificação: compara o hash calculado com o hash decifrado
-            return calculated_hash_int == decrypted_hash_int
+            if calculated_hash == decrypted_hash:
+                print("✅ Assinatura válida! A mensagem não foi alterada.")
+                return True
+            else:
+                print("❌ Assinatura inválida! A mensagem pode ter sido alterada.")
+                return False
             
         except Exception as e:
             raise ValueError(f"Erro na verificação da assinatura: {e}")
@@ -145,9 +144,11 @@ class Signer:
             # 2. Calcula o hash da mensagem original
             message_bytes = message.encode()
             calculated_hash = calculate_hash(message_bytes)
+            print(f"Hash da mensagem: {calculated_hash}")
 
             # 3. Decifração da assinatura (usando chave pública)
             decrypted_hash = self.rsa.decrypt_with_oaep(signature_int)
+            print(f"Hash decifrado: {decrypted_hash}")
 
             # 4. Verificação: compara o hash calculado com o hash decifrado
             if calculated_hash == decrypted_hash:

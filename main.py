@@ -21,7 +21,6 @@ def main():
 
         elif opcao == "2":
             print("\nAssinando mensagem...")
-            
             signer.sign_message_from_file()
             print("Operação concluída.")
 
