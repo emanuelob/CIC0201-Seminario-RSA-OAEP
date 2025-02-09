@@ -8,11 +8,9 @@ def main():
     while True:
         print("\n===== MENU PRINCIPAL =====")
         print("1. Gerar chaves RSA")
-        print("2. Cifrar mensagem (ler de um arquivo)")
-        print("3. Decifrar mensagem")
-        print("4. Assinar mensagem")
-        print("5. Verificar assinatura")
-        print("6. Sair")
+        print("2. Assinar mensagem")
+        print("3. Verificar assinatura")
+        print("4. Sair")
         
         opcao = input("Escolha uma opção: ")
 
@@ -22,26 +20,17 @@ def main():
             print("Chaves geradas e salvas em arquivos!")
 
         elif opcao == "2":
-            print("\nCifrando mensagem...")
-            rsa.encrypt_from_file()
-            print("Operação concluída.")
-
-        elif opcao == "3":
-            print("\nDecifrando mensagem...")
-            rsa.decrypt_from_file()
-            print("Operação concluída.")
-
-        elif opcao == "4":
             print("\nAssinando mensagem...")
+            
             signer.sign_message_from_file()
             print("Operação concluída.")
 
-        elif opcao == "5":
+        elif opcao == "3":
             print("\nVerificando assinatura...")
             signer.verify_signature_from_file()
             print("Operação concluída.")
 
-        elif opcao == "6":
+        elif opcao == "4":
             print("Saindo...")
             break
 

@@ -15,7 +15,6 @@ class OAEP:
             C = counter.to_bytes(4, 'big')
             mask += sha256(seed + C).digest()
             counter += 1
-        print(f"Máscara gerada com sucesso. Tamanho: {len(mask)} bytes")
         return mask[:length]
     
     def pad(self, message: bytes) -> bytes:
@@ -29,17 +28,16 @@ class OAEP:
         DB = lHash + PS + b'\x01' + message
         
         seed = os.urandom(self.hLen)
-        
+
         dbMask = self.mgf1(seed, self.k - self.hLen - 1)
         maskedDB = bytes(a ^ b for a, b in zip(DB, dbMask))
         seedMask = self.mgf1(maskedDB, self.hLen)
-        maskedSeed = bytes(a ^ b for a, b in zip(seed, seedMask))
+        maskedSeed = bytes(a ^ b for a, b in zip(seed, seedMask))       
         
         return b'\x00' + maskedSeed + maskedDB
     
     def unpad(self, padded: bytes) -> bytes:
         print("\nIniciando remoção do padding OAEP...")
-        print(f"Tamanho dos dados com padding: {len(padded)} bytes")
         
         maskedSeed = padded[1:1+self.hLen]
         maskedDB = padded[1+self.hLen:]
@@ -58,5 +56,4 @@ class OAEP:
             raise ValueError("Erro na decifração: padding inválido")
         
         mensagem = DB[i+1:]
-        print(f"Mensagem recuperada com sucesso. Tamanho: {len(mensagem)} bytes")
         return mensagem

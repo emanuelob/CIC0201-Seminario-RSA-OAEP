@@ -35,9 +35,3 @@ def generate_large_prime(bits):
         prime |= (1 << bits - 1) | 1  # Garante que o número tem o tamanho correto e é ímpar
         if miller_rabin(prime):
             return prime
-
-def generate_prime(bits=1024):
-    print("Gerando primo")
-    p = generate_large_prime(bits)
-
-    return p

@@ -1,6 +1,6 @@
 from ..hash.sha3 import calculate_hash
-from ..utils.base64_handler import Base64Handler
 import os
+import base64
 
 class Signer:
     def __init__(self, rsa):
@@ -11,7 +11,6 @@ class Signer:
             rsa: Instância da classe RSA com chaves geradas
         """
         self.rsa = rsa
-        self.base64_handler = Base64Handler()
 
     def sign_message(self, message: bytes) -> str:
         """
@@ -26,11 +25,11 @@ class Signer:
         # 1. Calcula o hash da mensagem
         message_hash = calculate_hash(message)
         
-        # 2. Converte o hash para inteiro
-        hash_int = int.from_bytes(message_hash, 'big')
+        # # 2. Converte o hash para inteiro
+        # hash_int = int.from_bytes(message_hash, 'big')
         
         # 3. Cifra o hash (assina) usando a chave privada
-        signature_int = self.rsa.decrypt(hash_int)  #usa decrypt pois assinar é cifrar com d
+        signature_int = self.rsa.decrypt_with_oaep(message_hash)  #usa decrypt pois assinar é cifrar com d
         
         # 4. Converte a assinatura para bytes
         signature = signature_int.to_bytes((signature_int.bit_length() + 7) // 8, 'big')
@@ -97,26 +96,21 @@ class Signer:
         # Convertendo para bytes
         message_bytes = message.encode()
 
-        # Calcula o hash da mensagem
+        # Calcula o hash da mensagem (aplica SHA-3)
         message_hash = calculate_hash(message_bytes)
 
-        # Converte o hash para inteiro
-        hash_int = int.from_bytes(message_hash, 'big')
-
         # Assina (cifra com a chave privada)
-        signature_int = self.rsa.decrypt(hash_int)  # Assinatura = Hash^d mod n
+        signature_int = self.rsa.encrypt_with_oaep(message_hash)
 
         # Converte a assinatura para bytes
         signature = signature_int.to_bytes((signature_int.bit_length() + 7) // 8, 'big')
 
-        # Agora temos certeza de que a chave pública está carregada corretamente
-        formatted_signature = self.base64_handler.format_signature(
-            message_bytes, signature, self.rsa.public_key
-        )
+        # Formata o resultado
+        signature_base64 = base64.b64encode(signature).decode()
 
         # Salva a assinatura no arquivo
         with open(output_file, "w", encoding="utf-8") as file:
-            file.write(formatted_signature)
+            file.write(signature_base64)
 
         print(f"Assinatura salva em '{output_file}'.")
 
@@ -126,6 +120,10 @@ class Signer:
         """
         if not os.path.exists(signature_file):
             print(f"Erro: Arquivo '{signature_file}' não encontrado.")
+            return
+        
+        if not os.path.exists("mensagem.txt"):
+            print(f"Erro: Arquivo 'mensagem.txt' não encontrado.")
             return
 
         # Garante que a chave pública seja carregada corretamente
@@ -137,20 +135,22 @@ class Signer:
         with open(signature_file, "r", encoding="utf-8") as file:
             signed_document = file.read().strip()
 
+        with open("mensagem.txt", "r", encoding="utf-8") as file:
+            message = file.read().strip()
+
         try:
             # 1. Parsing do documento assinado e decifração da mensagem (BASE64)
-            message, signature, public_key = self.base64_handler.parse_signature(signed_document)
+            signature_int = int.from_bytes(base64.b64decode(signed_document))
 
             # 2. Calcula o hash da mensagem original
-            calculated_hash = calculate_hash(message)
-            calculated_hash_int = int.from_bytes(calculated_hash, 'big')
+            message_bytes = message.encode()
+            calculated_hash = calculate_hash(message_bytes)
 
             # 3. Decifração da assinatura (usando chave pública)
-            signature_int = int.from_bytes(signature, 'big')
-            decrypted_hash_int = pow(signature_int, public_key[0], public_key[1])  # signature^e mod n
+            decrypted_hash = self.rsa.decrypt_with_oaep(signature_int)
 
             # 4. Verificação: compara o hash calculado com o hash decifrado
-            if calculated_hash_int == decrypted_hash_int:
+            if calculated_hash == decrypted_hash:
                 print("✅ Assinatura válida! A mensagem não foi alterada.")
                 return True
             else:
